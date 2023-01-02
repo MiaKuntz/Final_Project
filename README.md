@@ -8,5 +8,6 @@ The purpose of this repository is to aid in obtaining a futher understanding of 
 The authors of this project are
 
 Marie Højlund Christiansen
+
 Mia Thuge Kuntz
 
