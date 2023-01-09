@@ -4,6 +4,9 @@ Our respository pertaining to our final project on the difference between men an
 ## Description
 The purpose of this repository is to aid in obtaining a futher understanding of our final project report by gaining access to our script and its results. As mentioned above, the purpose of this report is to gain an insight into the difference we expect to fint between men and women when it comes to their participation in the investment market, but also when it comes to their financial literacy and risk willingness, and from this, along with some if the imediate distributions, be able to conclude whether the expected results show.
 
+## Software
+To run the script you need to install RStudio as we used this language in our project. The software version used was RStudio-2022.12.0-353.
+
 ## The data
 Our data set "invest_survey" was provided by Ingeborg Christine Leegard and Mia Thuge Kuntz. It originates from their bachelors thesis done in the autumn of 2022, and was based on a danish questionnare completed by more than 300 respondents in all ages and genders. The following variables, including their explanations, are included in the data:
 
