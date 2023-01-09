@@ -1,0 +1,285 @@
+---
+title: "Analysing Data of Invest Survey"
+author: "Marie Højlund Christiansen and Mia Thuge Kuntz"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Getting started
+## Introduction to the project
+The motivation and background for this project can be found in our report. Based on this we now wish to conduct an analytically and visually focused project, which will possibly shed light on correlations and dependencies between the variables included in our data set *invest_survey*. It is important to note that the following test and the chosen variables and their relationships were chosen based on our background knowledge of this subject.
+
+## Data set and variables
+The following project makes use of the *invest_survey* data set, which can be found in our GitHub repository or via following link: https://github.com/MiaKuntz/Final_Project/blob/7f541e6fa47af9344ca9615542a0fbfc801d3b96/invest_survey.csv
+
+The variables presented in the data set are based on survey questions, which can be found in the document "Questionnaire" in our GitHub repository or via following link:
+https://github.com/MiaKuntz/Final_Project/blob/c812ab731c9376f1326d58a7a045dd4bb636e1f8/Questionnaire.pdf
+
+The variables and their descriptions are as follows: 
+
+- Gender of respondent
+  + man
+- Age of respondent
+  + age
+- Relationship status of respondent
+  + partner
+- Educational level of respondent on a scale of 1-5 
+  + edu
+- Economical or mathematical focus in respondent's education on a scale of 1-5
+  + edu_econ
+- Perceived financial literacy on a scale of 1-5
+  + per_fl
+- Actual financial literacy on a scale of 1-3 
+  + fl_grade 
+- Whether the respondent has invested or not
+  + invest
+- The category/type of investment
+  + invest_c
+- Different types of questions pertaining to the respondent's attitude toward finances and economic concepts are shown through following variables
+  + stat_1
+  + stat_2
+  + stat_3
+  + stat_4
+  + stat_5
+- Perceived risk willingness on a scale of 1-5
+  + rw
+- Actual risk willingness on a scale of 1-3
+  + rw_grade
+  
+Important to note about several of the variables is that many are binary, where "0" represents the answer "no" and "1" the answer "yes".
+
+The project will make use of the **tidyverse** and **ggpubr** packages along with the **here** library.
+
+## Our tools
+Major parts of this project will make use of correlation tests to see whether significant relations between our variables can be confirmed - by use of the data set based on an investment survey. We will use the `cor.test` function to obtain the desired results. We will throughout the report include visualisations of different variables used in our tests to shed light on some of their distributions.
+
+# Inspecting data
+The first part of our project is to assess our data by various processing tools and functions. This is done primarily for our own sake, as it provides us with a way of getting familiar with the data - which is always desired when working on a project. The following will be shown in our report, as it is a deliberate choice on our side to show functions many would consider to hide in their project e.g. by using the `include = FALSE` function. 
+
+Getting started on the project we first install the necessary packages and libraries. 
+```{r libraries}
+library(tidyverse)
+library(here)
+library("ggpubr")
+```
+
+
+Before loading in our data, we first wish to know the directory we are working in, since loading in our data set will be made easier by having set the correct path. We first check whether the path is already correct by using the `getwd` function.
+```{r wd}
+getwd()
+```
+Luckily we are on the right path, and our working directory is set as the "final_project" folder.
+
+We are now able to correctly load in our data. We choose to immediately assign the data set to its own object for the further use of it throughout the project.
+```{r data}
+survey <- read.csv2("invest_survey.csv")
+```
+
+This loads in our data set as a data frame. 
+
+We are also able to double check this by running the `class` function on the object.
+```{r class}
+class(survey)
+```
+This function confirms the data set as a data frame.
+
+We have now successfully imported our data set. To see the different columns - the variables of our data - we use the `names` function.
+```{r column names}
+names(survey)
+```
+This provides us with a quick overview of the 16 different variables in the data. 
+
+
+For the purpose of keeping our report clean, we choose to make use of the `eval = FALSE` code for the following code chunks, as we would like to show the code used but not the whole data set, which would be the output, in our report.
+
+To further assess the data - perhaps to shows the different observations or data types of the columns - we can either run the object name as a function of its own.
+```{r survey, eval=FALSE}
+survey
+```
+Or use the `str` function.
+```{r str, eval=FALSE}
+str(survey)
+```
+As can be seen from the two outputs, it definitely looks cleaner when using the object name to assess the data frame, although both functions were able to give us an overview of the data showing the 16 variables and their column names, along with the 262 observations as row values.
+
+From the *invest_c* column we see that the data contains NA's. To fix this we wish replace the NA's with 0's using the `is.na` function, and immediately check it by once again running the object name.
+```{r remove NA}
+survey[is.na(survey)] = 0
+survey
+```
+The function worked replacing NA's in the data set. For some reason, the change of NA's to 0's wouldn't stay permanent when using the `eval = FALSE` function, and we regrettably include the whole output of the function in our report.
+
+The data types of the different variables show as integer classes (or numeric). This makes sense, as all the observational values are whole numbers.
+
+As can be seen from the `str` function, the age variable seems to be sorted from lowest to high. To show the last values of the data frame, and thereforeee the highest participating ages in the survey, we use the `tail` function.
+```{r survey tail}
+tail(survey)
+```
+
+Here are the last 6 rows of the data frame showing. 
+
+If we wanted to e.g. show the last 10 values of the age variable, we would need to make use of the `$` function to determine which column we are interested in showing, along with a bit of specification on the `tail` function by setting n=10.
+```{r age tail}
+tail(survey$age, n=10)
+```
+This shows that the highest participating age is 83. 
+
+To have the rest of our project run along more smoothly and further prepare our global environment for the following test and visualisations, we assign each column to its own object.
+```{r objects}
+man <- (survey$man)
+age <- (survey$age)
+partner <- (survey$partner)
+edu <- (survey$edu)
+edu_econ <- (survey$edu_econ)
+per_fl <- (survey$per_fl)
+fl_grade <- (survey$fl_grade)
+invest <- (survey$invest)
+invest_c <- (survey$invest_c)
+stat_1 <- (survey$stat_1)
+stat_2 <- (survey$stat_2)
+stat_3 <- (survey$stat_3)
+stat_4 <- (survey$stat_4)
+stat_5 <- (survey$stat_5)
+rw <- (survey$rw)
+rw_grade <- (survey$rw_grade)
+```
+
+We have now prepared our environment for further use in our project. The following parts will focus on the different aspects of our problem statement and background for the subject.
+
+# Man and invest
+In order to investigate whether there is a difference between men and women when pertaining to their investment participation, we first wish to investigate the relationship between *man* and *invest* - the two variables we find best describes and catches the area we wish to investigate. Both variables are represented by the two categories "0" and "1", with "0" meaning either "no" to having invested or "no" to being male, and "1" meaning either "yes" to having invested or "yes" to being male.
+
+## Distribution
+Firstly, we wish to show the immediate distribution in respondents answers to the questions from which the variables were created. We use the `mosaicplot` function to create this visual, where the reason for using this particular plot comes from the fact that we are working with two binary variables.
+```{r man invest plot}
+mosaicplot(~man + invest,data=survey, main = "Distrubtuion of gender and invest", xlab = "Gender", ylab = "Investment participation", shade = TRUE)
+```
+
+As we are not able to add the exact numbers of the distribution, we choose to use the `table` function to check the actual distributions of both the *man* and *invest* variables.
+```{r man invest table}
+table(invest, man)
+```
+From the immediate distribution it looks as if the men are outnumbered by the women in this study, with the men having answered "yes" to having invested more often than the women. We are also able to see from both the mosaic plot and the table, that the biggest difference is actually between the men and women who haven't invested, where 68 female and 33 male respondents answered "no" to having any type of investments. By adding `shade=TRUE` to our function for the mosaic plot we are able to observe, that the number of males who haven't invested, at least in this particular survey, are lower than what the statistic model would have predicted. This can be seen from the standardized residuals, where the purpose of the colours and lines of the shapes is to indicate whether or not the actual distributions are higher or lower than the models predictions.
+
+From this we wish to further investigate whether or not this difference between genders and investment participation actually is significant, or if the differences shown aren't as big as we interpret them to be.
+
+## Correlation test
+By assessing the p value in the relationship between *man* and *invest* and looking at their correlation effect, we wish to investigate the possible significant dependency between them. From this we will be able to confirm whether or not being male has significant influence on an individuals participation in the stock market - that is whether they have invested or not. 
+```{r man invest cor}
+cor.test(man, invest, method=c("pearson"))
+```
+The correlation between the variables = 0,22 indicates that the expected interaction between these variables is low, since gender, in theory, shouldn't predict whether an individual has invested or not. But as we can see from the p value = 0,0003211, which is less than the chosen alpha level = 0,05, we conclude, that there is significant dependency between *invest* and *man*. Being male can therefore be a predictor for whether or not an individual has invested, with men having answered "yes" to having invested more often than women. These results follow and realize the expectation we had after looking at the distribution of the variables, along with our knowledge from the literature and background research on the subject.
+
+### Visualising the analytics
+The following scatter plot is a visualisation of the above results. As we are using two binary variables, the scatter plot won't show much except the co variation between the variables in the way of our regression line. In addition, the scatter plot gives the statistic results we just used the `cor.test` function to get, that is the p value and correlation. In the plot, where we make use of the `ggscatter` function, we define the variables we wish to create the plot around - these still being *man* and *invest*, along with adding the desired regression line with  confidence intervals, correlation, chosen p value, along with labels and title.
+```{r man invest scatter}
+ggscatter(survey, x = "man", y = "invest",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Gender", ylab = "Investment participation", title = "Scatter plot of gender and invest")
+```
+
+The above plot supports the conclusion of there being dependency between the variables, as a positive R = 0,22 shows that the chances of having invested increases if you are male. This is visualised by the regression line having a slight rise towards the 1 value on the x-axis - the value for being male in the gender variable. The actual value of the observations doesn't reveal much as they, once again, are binary variables. 
+
+# Gender and financial literacy
+Since we have confirmed dependency between gender and invest in this case, we now wish to further investigate what else gender may have an influence on. From the provided data set, we will be able to further investigate whether the questioned men and women possesses equal financial knowledge, both due to their own perceptions as well as their tested knowledge on questions concerning financial knowledge. 
+
+The data set we use has provided us with two variables for financial literacy - *per_fl*, which is based on the respondents perceived financial literacy, and *fl_grade*, which is based on the respondents score on different questions pertaining to their financial knowledge ranked on a scale from 1-3.
+
+## Distribution
+We find it interesting to first take a look at the distributions of the respondents answers to both their own perceived financial literacy and what we here call their ‘actual’ tested financial literacy. A plot showing the immediate distribution will often give a first glance at what ends up as being the final result, and we therefore include this in our project to gather a quick impression of the results we expect from testing them. We here use bar plots to illustrate, and the choice of facet wrapping by gender was deliberate, as this provides a clean setup, where the distribution of the variables is still possible to compare.
+```{r perceived financial literacy plot}
+ggplot(survey) +
+  aes(x = per_fl) +
+  geom_bar(aes(color = as.factor(man)), position = "dodge") +
+  scale_color_manual(values = c("0" = "red",
+                                "1" = "blue")) +
+  labs(title = "Distribution of gender and perceived financial literacy", 
+      x = "Perceived financial literacy",
+      y = "Count") +
+  facet_wrap(~ man)
+```
+
+```{r actual financial literacy plot}
+ggplot(survey) +
+  aes(x = fl_grade) +
+  geom_bar(aes(color = as.factor(man)), position = "dodge") +
+  scale_color_manual(values = c("0" = "red",
+                                "1" = "blue")) +
+  labs(title = "Distribution of gender and actual financial literacy", 
+      x = "Actual financial literacy",
+      y = "Count") +
+  facet_wrap(~ man)
+```
+
+Even though the scales on which the two variables are measured aren't the same, we are still able to gather an immediate impression of the distribution between the two genders. Important to remember is that the survey consists of more respondents of the female gender, and so when evaluating these results we keep this is mind. 
+
+From the first graphs which illustrates the distributions of the respondents perceived financial literacy we are able to see, that men tend to rate themselves higher than women. From the second graphs which depicts the respondents score on their actual financial literacy we are able to conclude, that the men also seem to score higher when tested than the women. 
+
+Apart from the immediate distribution we would also here like to carry out a correlation test for these variables and their possible dependency with gender, since we know that distribution isn't always a reliable measure for significance. 
+
+## Correlation test
+We once again use the `cor.test` function to test the two variables for financial literacy to investigate, whether or not any, one, or both of them can be seen as statistically significant when testing with gender. First, the perceived financial literacy by using the *per_fl* variable.
+```{r man per_fl cor}
+cor.test(man, per_fl, method=c("pearson"))
+```
+As can be seen from a near 0 p value, the dependency between the perceived financial literacy of the respondents and whether they are a man or woman is significant. That means, based on this study, the men participating were significantly more likely to rate themselves higher on the scale of 1-5 than the female participants. Now we test the actual financial literacy by using the *fl_grade* variable.  
+```{r man fl_grade cor}
+cor.test(man, fl_grade, method=c("pearson"))
+```
+With a p value = 0,0125, which is below the chosen level of significance = 0,05, we see a significant dependency between one´s gender and actual knowledge on financial matters. In the same matter as the perceived financial literacy, being male in this particular study means, that you are statistically more likely to score higher on the 1-3 grading than the female participants. Both tests showed a positive correlation with the gender variable, with the test including perceived financial literacy having the highest = 0,25 and actual financial literacy having the lowest = 0,15. Both of these results support the conclusion of the p value.
+
+# Gender and risk willingness
+In the last part of this project we wish to investigate the relationship between gender and risk willingness. Our reasoning for including this exploration lies in the way of this being seen as a supplement to the above tests, as the investigation of these variables can be an expression of our own, and perhaps society's, expected outcome in the way of women being less willing to take risk and therefore having invested less than men. Whether or not that is the actual case will be known after we conduct our tests. In this particular data set risk willingness is expressed in two variables much like those for financial literacy - a perceived score on a scale of 1-5 and an actual score on a scale of 1-3. 
+
+## Distribution
+First, we take a look on the distributions of the variables in relation to the two genders and their answers. We have used this approach before when looking at the distribution of the variables for financial literacy, and we were here able to conclude, that the initial impression of the distributions was a fair way of gaining a quick insight into the actual outcome of the testing of significance. We therefore find it interesting to see whether this is mere coincidence or if the same applies to the variables for risk willingness. We choose to make use of the same plots as for financial literacy, as the variables representing risk willingness are build up in the same fashion.
+```{r perceived risk willingness plot}
+ggplot(survey) +
+  aes(x = rw) +
+  geom_bar(aes(color = as.factor(man)), position = "dodge") +
+  scale_color_manual(values = c("0" = "red",
+                                "1" = "blue")) +
+  labs(title = "Distribution of gender and perceived risk willingness", 
+      x = "Perceived risk willingness",
+      y = "Count") +
+  facet_wrap(~ man)
+```
+
+
+```{r actual risk willingness plot}
+ggplot(survey) +
+  aes(x = rw_grade) +
+  geom_bar(aes(color = as.factor(man)), position = "dodge") +
+  scale_color_manual(values = c("0" = "red",
+                                "1" = "blue")) +
+  labs(title = "Distribution of gender and actual risk willingness", 
+      x = "Actual risk willingness",
+      y = "Count") +
+  facet_wrap(~ man)
+```
+
+First glance at both of the graphs shows us, that men are more risk willing both by own assessment as well as their actual risk willingness grade based on their answers to the related questions in the questionnaire. The odd one out is seen in the actual risk willingness for men, where almost none scored a 1. It could from this alone be concluded, that men based on the study are more risk willing than women. 
+
+What is also interesting when looking at the perceived risk willingness, as well as the perceived financial literacy, is that the respondents tend to stick close to the middle answers when comparing to how they actually fare and behave. It gives reason to wonder, if this is a result of the actual behavior in Danes, or if the case study design from which the used data set originates contains certain flaws in its population representation. 
+
+## Correlation test
+To see whether or not these impressions of the relationship between the two variables for risk willingness and gender truly are significant, we here carry out a correlation test in the same manner as previously done. 
+
+Firstly, we test gender and the perceived risk willingness *rw*.
+```{r man rw cor}
+cor.test(man, rw, method=c("pearson"))
+```
+
+We thereafter test gender and the actual risk willingness *rw_grade*.
+```{r man rw_grade cor}
+cor.test(man, rw_grade, method=c("pearson"))
+```
+Both relationships shows significant dependency and high correlations, with the variable showing the respondents actual risk willingness as the one with the highest correlation with gender = 0,41. From these results we conclude, that being male does influence both ones perceived and actual risk willingness, with men being more willing to take risks than women - at least in this economically focused study. 
+
+Since men in general scored themselves higher and received actual higher scores we ponder the question, if maybe ones self confidence regarding both financial knowledge and risk willingness has a higher influence on the actual outcome than first expected. And could this maybe be an indication of a low self confidence in women when pertaining to these factors. 
+
+Further discussion and evaluation of our results, along with our interpretation of their impact on society in relation to our background study and motivation for this project, will be included in our complete final project report. 
