@@ -114,7 +114,7 @@ The function worked replacing NA's in the data set. For some reason, the change 
 
 The data types of the different variables show as integer classes (or numeric). This makes sense, as all the observational values are whole numbers.
 
-As can be seen from the `str` function, the age variable seems to be sorted from lowest to high. To show the last values of the data frame, and thereforeee the highest participating ages in the survey, we use the `tail` function.
+As can be seen from the `str` function, the age variable seems to be sorted from lowest to high. To show the last values of the data frame, and therefore see the highest participating ages in the survey, we use the `tail` function.
 ```{r survey tail}
 tail(survey)
 ```
